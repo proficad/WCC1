@@ -17,6 +17,18 @@ html, body { height: 100%; margin: 0; }
   height: 100%;
   display: grid;
   grid-template-columns: 132px 1fr;
+  grid-template-rows: 1fr auto;
+}
+
+.palette { grid-row: 1 / span 2; }
+
+.status {
+  grid-column: 2;
+  padding: 8px 14px;
+  border-top: 1px solid var(--grid);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .palette {
@@ -61,3 +73,8 @@ html, body { height: 100%; margin: 0; }
 .symbol .arrow { stroke-width: 1.5; }
 .symbol .label { fill: var(--ink); stroke: none; font-size: 12px; font-weight: 600; }
 .symbol.preview { opacity: 0.4; }
+.wire.preview { stroke: var(--accent); stroke-dasharray: 5 4; }
+.symbol.selected, .wire.selected { stroke: var(--accent); }
+.symbol.selected .label { fill: var(--accent); }
+.wire.selected { stroke-width: 3; }
+.pin-marker { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }

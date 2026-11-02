@@ -1,25 +1,48 @@
-// Thin layer: builds the DOM, translates DOM events into editor events and re-renders (PRD T2 controller/).
+// Thin layer: builds the DOM, translates DOM events into editor events, persists and re-renders (PRD T2 controller/).
 import { initialState, transition } from '../editor';
 import type { EditorEvent, EditorState, Hit } from '../editor';
-import type { Point } from '../model';
-import { createCanvas, GRID, PALETTE, render, symbolMarkup } from '../view';
+import { deserialize, emptySchematic, serialize, STORAGE_KEY } from '../model';
+import type { Point, Schematic } from '../model';
+import { createCanvas, GRID, PALETTE, render, statusText, symbolMarkup } from '../view';
+import { hitTest } from './hitTest';
 
 const deps = { newId: () => crypto.randomUUID() };
 
+/** Restores the saved schematic; missing or invalid data gives an empty canvas and a warning (PRD F21). */
+function loadSchematic(): Schematic {
+  let text: string | null = null;
+  try {
+    text = localStorage.getItem(STORAGE_KEY);
+  } catch (err) {
+    console.warn('Mini editor: localStorage is not available', err);
+  }
+  if (text === null) return emptySchematic();
+  const result = deserialize(text);
+  if (!result.ok) {
+    console.warn(`Mini editor: saved schematic ignored (${result.error})`);
+    return emptySchematic();
+  }
+  return result.schematic;
+}
+
+/** Saves after every change of the model (PRD F20). */
+function saveSchematic(s: Schematic): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, serialize(s));
+  } catch (err) {
+    console.warn('Mini editor: saving failed', err);
+  }
+}
+
 /** Pointer position in canvas pixels. */
-function canvasPoint(svg: SVGSVGElement, e: MouseEvent): { x: number; y: number } {
+function canvasPoint(svg: SVGSVGElement, e: MouseEvent): Point {
   const r = svg.getBoundingClientRect();
   return { x: e.clientX - r.left, y: e.clientY - r.top };
 }
 
-/** Nearest grid point to the pointer (PRD F3, F7). */
-function snap(p: { x: number; y: number }): Point {
+/** Nearest grid point to a pixel position (PRD F3, F7). */
+function snap(p: Point): Point {
   return { x: Math.round(p.x / GRID), y: Math.round(p.y / GRID) };
-}
-
-/** Hit-test; filled in phase 5 (PRD H1–H3). */
-function hitTest(): Hit {
-  return { type: 'empty' };
 }
 
 function keyOf(e: KeyboardEvent): Extract<EditorEvent, { type: 'key' }>['key'] | null {
@@ -30,13 +53,16 @@ function keyOf(e: KeyboardEvent): Extract<EditorEvent, { type: 'key' }>['key'] |
 }
 
 export function mountEditor(root: HTMLElement): void {
-  let state: EditorState = initialState();
+  let state: EditorState = initialState(loadSchematic());
+  let hover: Hit | null = null;
 
   root.innerHTML = `
     <aside class="palette" aria-label="Paleta značek"></aside>
-    <main class="stage"></main>`;
+    <main class="stage"></main>
+    <footer class="status" role="status"></footer>`;
   const palette = root.querySelector<HTMLElement>('.palette')!;
   const stage = root.querySelector<HTMLElement>('.stage')!;
+  const status = root.querySelector<HTMLElement>('.status')!;
   const svg = createCanvas();
   stage.append(svg);
 
@@ -51,26 +77,37 @@ export function mountEditor(root: HTMLElement): void {
   });
 
   function dispatch(event: EditorEvent): void {
-    state = transition(state, event, deps).state;
+    const result = transition(state, event, deps);
+    state = result.state;
+    if (result.save) saveSchematic(state.schematic);
     update();
   }
 
   function update(): void {
-    render(svg, state);
+    render(svg, state, hover);
+    status.textContent = statusText(state.mode);
     const active = state.mode.kind === 'place' ? state.mode.symbolKind : null;
     for (const { kind, btn } of buttons) btn.classList.toggle('active', kind === active);
   }
 
   svg.addEventListener('pointermove', (e) => {
-    dispatch({ type: 'pointerMove', at: snap(canvasPoint(svg, e)) });
+    const p = canvasPoint(svg, e);
+    hover = hitTest(state.schematic, p);
+    dispatch({ type: 'pointerMove', at: snap(p) });
+  });
+
+  svg.addEventListener('pointerleave', () => {
+    hover = null;
+    update();
   });
 
   svg.addEventListener('pointerdown', (e) => {
     if (e.button !== 0 && e.button !== 2) return;
+    const p = canvasPoint(svg, e);
     dispatch({
       type: 'pointerDown',
-      at: snap(canvasPoint(svg, e)),
-      hit: hitTest(),
+      at: snap(p),
+      hit: hitTest(state.schematic, p),
       button: e.button === 0 ? 'left' : 'right',
     });
   });

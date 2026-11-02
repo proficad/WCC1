@@ -30,7 +30,16 @@ export const SYMBOL_SVG: Partial<Record<SymbolKind, string>> = {
     `<path d="M0,-13 L8,-21 M4,-21 L8,-21 L8,-17 M7,-11 L15,-19 M11,-19 L15,-19 L15,-15" class="arrow"/>`,
 };
 
-export const PALETTE: { kind: SymbolKind; label: string }[] = [
+/** Clickable body at rotation 0, as half extents in px around the center (PRD H2). Pins take priority. */
+export const SYMBOL_BODY: Partial<Record<SymbolKind, { halfWidth: number; halfHeight: number }>> = {
+  resistor: { halfWidth: 40, halfHeight: 12 },
+  battery: { halfWidth: 40, halfHeight: 16 },
+  lamp: { halfWidth: 40, halfHeight: 14 },
+  switch: { halfWidth: 40, halfHeight: 15 },
+  led: { halfWidth: 40, halfHeight: 22 },
+};
+
+export const PALETTE:{ kind: SymbolKind; label: string }[] = [
   { kind: 'resistor', label: 'Rezistor' },
   { kind: 'battery', label: 'Baterie' },
   { kind: 'lamp', label: 'Žárovka' },
