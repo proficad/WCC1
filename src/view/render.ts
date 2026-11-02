@@ -85,5 +85,7 @@ export function statusText(mode: Mode): string {
       return 'Klikni pro položení · R otočí · Esc konec';
     case 'wire':
       return 'Klikni na cílový pin · Esc zruší';
+    case 'drag':
+      return 'Táhni značku · pusť tlačítko pro položení';
   }
 }

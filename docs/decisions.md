@@ -24,6 +24,7 @@
   - Volba jiné značky v paletě během pokládání zachová aktuální rotaci.
 
   **Důvod:** jednoznačné a nejjednodušší varianty. Žádná z nich není vidět v akceptačních kritériích.
+- **Tažení (fáze 6):** během tažení se klávesy ignorují, Esc tažení nevrací zpět. Práh 4 px hlídá controller. Automat dostane `dragMove` až po jeho překročení a mimo režim tažení ho bere jako obyčejný pohyb myši. **Důvod:** PRD chování kláves při tažení neurčuje a vracení zpět by přidalo stav bez vazby na akceptační kritéria.
 
 ## Zamítnuté námitky
 

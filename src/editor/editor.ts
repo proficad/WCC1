@@ -5,6 +5,8 @@ import {
   addWire,
   deleteObject,
   emptySchematic,
+  findSymbol,
+  moveSymbol,
   rotateClockwise,
   rotateSymbol,
 } from '../model';
@@ -24,7 +26,13 @@ export type Mode =
   /** Placing symbols; `cursor` is the snapped grid point of the preview (PRD F7–F10). */
   | { kind: 'place'; symbolKind: SymbolKind; rotation: Rotation; cursor: Point | null }
   /** Drawing a wire from `from`; `cursor` drives the route preview (PRD F16). */
-  | { kind: 'wire'; from: PinRef; cursor: Point | null };
+  | { kind: 'wire'; from: PinRef; cursor: Point | null }
+  /**
+   * Pressed on a symbol body; it follows `dragMove` events until `pointerUp` (PRD F12).
+   * `grab` is the symbol position minus the pointer grid point at press time.
+   * `start` is the schematic before the drag, so the whole drag is saved as one change.
+   */
+  | { kind: 'drag'; symbolId: string; grab: Point; start: Schematic };
 
 export interface EditorState {
   schematic: Schematic;
@@ -37,6 +45,9 @@ export type EditorEvent =
   /** `at` is the pointer position snapped to the grid. */
   | { type: 'pointerMove'; at: Point }
   | { type: 'pointerDown'; at: Point; hit: Hit; button: 'left' | 'right' }
+  /** Sent by the controller only after the pointer moved at least 4 px while pressed (PRD H4). */
+  | { type: 'dragMove'; at: Point }
+  | { type: 'pointerUp' }
   | { type: 'key'; key: 'R' | 'Escape' | 'Delete' };
 
 export interface Deps {
@@ -57,15 +68,23 @@ const SELECT: Mode = { kind: 'select' };
 
 export function transition(state: EditorState, event: EditorEvent, deps: Deps): TransitionResult {
   const next = step(state, event, deps);
-  return { state: next, save: next.schematic !== state.schematic };
+  // During a drag the schematic changes live but is saved only once, when the drag ends (PRD F12, F20).
+  if (next.mode.kind === 'drag') return { state: next, save: false };
+  const before = state.mode.kind === 'drag' ? state.mode.start : state.schematic;
+  return { state: next, save: next.schematic !== before };
 }
 
 function step(state: EditorState, event: EditorEvent, deps: Deps): EditorState {
   // Choosing a symbol in the palette always enters placing and clears the selection (PRD F7).
   if (event.type === 'paletteClick') {
     const rotation = state.mode.kind === 'place' ? state.mode.rotation : 0;
-    const cursor = state.mode.kind === 'select' ? null : state.mode.cursor;
+    const cursor = state.mode.kind === 'place' || state.mode.kind === 'wire' ? state.mode.cursor : null;
     return { ...state, selection: null, mode: { kind: 'place', symbolKind: event.kind, rotation, cursor } };
+  }
+
+  // Outside a drag, moving with the button held is an ordinary pointer move.
+  if (event.type === 'dragMove' && state.mode.kind !== 'drag') {
+    return step(state, { type: 'pointerMove', at: event.at }, deps);
   }
 
   switch (state.mode.kind) {
@@ -75,6 +94,22 @@ function step(state: EditorState, event: EditorEvent, deps: Deps): EditorState {
       return stepPlace(state, state.mode, event, deps);
     case 'wire':
       return stepWire(state, state.mode, event, deps);
+    case 'drag':
+      return stepDrag(state, state.mode, event);
+  }
+}
+
+function stepDrag(state: EditorState, mode: Extract<Mode, { kind: 'drag' }>, event: EditorEvent): EditorState {
+  switch (event.type) {
+    case 'dragMove':
+      return {
+        ...state,
+        schematic: moveSymbol(state.schematic, mode.symbolId, event.at.x + mode.grab.x, event.at.y + mode.grab.y),
+      };
+    case 'pointerUp':
+      return { ...state, mode: SELECT };
+    default:
+      return state; // keys and other pointer events are ignored while dragging
   }
 }
 
@@ -87,8 +122,21 @@ function stepSelect(state: EditorState, event: EditorEvent): EditorState {
         return { ...state, selection: null, mode: { kind: 'wire', from: hit.ref, cursor: event.at } };
       case 'wire':
         return { ...state, selection: { type: 'wire', id: hit.id } };
-      case 'symbol':
-        return { ...state, selection: { type: 'symbol', id: hit.id } };
+      case 'symbol': {
+        // Select the symbol and get ready to drag it by its body (PRD F11, F12, H3).
+        const sym = findSymbol(state.schematic, hit.id);
+        if (!sym) return state;
+        return {
+          ...state,
+          selection: { type: 'symbol', id: hit.id },
+          mode: {
+            kind: 'drag',
+            symbolId: hit.id,
+            grab: { x: sym.x - event.at.x, y: sym.y - event.at.y },
+            start: state.schematic,
+          },
+        };
+      }
       case 'empty':
         return { ...state, selection: null };
     }

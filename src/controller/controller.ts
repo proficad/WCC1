@@ -90,11 +90,28 @@ export function mountEditor(root: HTMLElement): void {
     for (const { kind, btn } of buttons) btn.classList.toggle('active', kind === active);
   }
 
+  // Press position of the left button; a drag starts once the pointer moves 4 px away (PRD H4).
+  let press: Point | null = null;
+  let dragging = false;
+  const DRAG_THRESHOLD = 4;
+
   svg.addEventListener('pointermove', (e) => {
     const p = canvasPoint(svg, e);
     hover = hitTest(state.schematic, p);
-    dispatch({ type: 'pointerMove', at: snap(p) });
+    if (press && !dragging && Math.hypot(p.x - press.x, p.y - press.y) >= DRAG_THRESHOLD) dragging = true;
+    dispatch(dragging ? { type: 'dragMove', at: snap(p) } : { type: 'pointerMove', at: snap(p) });
   });
+
+  function endPress(): void {
+    if (!press) return;
+    press = null;
+    dragging = false;
+    dispatch({ type: 'pointerUp' });
+  }
+  svg.addEventListener('pointerup', (e) => {
+    if (e.button === 0) endPress();
+  });
+  svg.addEventListener('pointercancel', endPress);
 
   svg.addEventListener('pointerleave', () => {
     hover = null;
@@ -104,6 +121,11 @@ export function mountEditor(root: HTMLElement): void {
   svg.addEventListener('pointerdown', (e) => {
     if (e.button !== 0 && e.button !== 2) return;
     const p = canvasPoint(svg, e);
+    if (e.button === 0) {
+      press = p;
+      dragging = false;
+      svg.setPointerCapture(e.pointerId); // keep receiving moves when the pointer leaves the canvas
+    }
     dispatch({
       type: 'pointerDown',
       at: snap(p),
