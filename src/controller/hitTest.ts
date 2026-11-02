@@ -46,7 +46,6 @@ export function hitTest(s: Schematic, p: Point): Hit {
 
   for (const sym of [...s.symbols].reverse()) {
     const body = SYMBOL_BODY[sym.kind];
-    if (!body) continue;
     const local = rotatePoint({ x: p.x - sym.x * GRID, y: p.y - sym.y * GRID }, INVERSE[sym.rotation]);
     if (Math.abs(local.x) <= body.halfWidth && Math.abs(local.y) <= body.halfHeight) {
       return { type: 'symbol', id: sym.id };

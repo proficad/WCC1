@@ -76,6 +76,23 @@ export function mountEditor(root: HTMLElement): void {
     return { kind, btn };
   });
 
+  // New schematic clears the canvas and the saved data after confirmation (PRD F22).
+  const clearBtn = document.createElement('button');
+  clearBtn.type = 'button';
+  clearBtn.className = 'clear-button';
+  clearBtn.textContent = 'Nové schéma';
+  clearBtn.addEventListener('click', () => {
+    if (!window.confirm('Smazat celé schéma? Tuto akci nelze vrátit.')) return;
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (err) {
+      console.warn('Mini editor: clearing saved data failed', err);
+    }
+    state = initialState();
+    update();
+  });
+  palette.append(clearBtn);
+
   function dispatch(event: EditorEvent): void {
     const result = transition(state, event, deps);
     state = result.state;

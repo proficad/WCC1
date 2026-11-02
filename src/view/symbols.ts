@@ -6,8 +6,8 @@ export const GRID = 20;
 
 const lead = (x1: number, x2: number) => `<line x1="${x1}" y1="0" x2="${x2}" y2="0"/>`;
 
-/** Inner SVG markup per symbol kind. COULD symbols (capacitor, diode, ground) come in phase 7. */
-export const SYMBOL_SVG: Partial<Record<SymbolKind, string>> = {
+/** Inner SVG markup per symbol kind. */
+export const SYMBOL_SVG: Record<SymbolKind, string> = {
   resistor: `${lead(-40, -20)}<rect x="-20" y="-8" width="40" height="16"/>${lead(20, 40)}`,
 
   // Pin 0 (left) is +, drawn as the longer plate.
@@ -28,15 +28,32 @@ export const SYMBOL_SVG: Partial<Record<SymbolKind, string>> = {
     `${lead(-40, -10)}<polygon points="-10,-10 -10,10 8,0"/>` +
     `<line x1="8" y1="-10" x2="8" y2="10"/>${lead(8, 40)}` +
     `<path d="M0,-13 L8,-21 M4,-21 L8,-21 L8,-17 M7,-11 L15,-19 M11,-19 L15,-19 L15,-15" class="arrow"/>`,
+
+  capacitor:
+    `${lead(-40, -5)}<line x1="-5" y1="-14" x2="-5" y2="14"/>` +
+    `<line x1="5" y1="-14" x2="5" y2="14"/>${lead(5, 40)}`,
+
+  // Pin 0 (left) is the anode; the triangle points to the cathode bar.
+  diode:
+    `${lead(-40, -10)}<polygon points="-10,-10 -10,10 8,0"/>` +
+    `<line x1="8" y1="-10" x2="8" y2="10"/>${lead(8, 40)}`,
+
+  // Single pin on top at (0, -1 gu) = (0, -20 px).
+  ground:
+    `<line x1="0" y1="-20" x2="0" y2="0"/><line x1="-14" y1="0" x2="14" y2="0"/>` +
+    `<line x1="-9" y1="5" x2="9" y2="5"/><line x1="-4" y1="10" x2="4" y2="10"/>`,
 };
 
 /** Clickable body at rotation 0, as half extents in px around the center (PRD H2). Pins take priority. */
-export const SYMBOL_BODY: Partial<Record<SymbolKind, { halfWidth: number; halfHeight: number }>> = {
+export const SYMBOL_BODY: Record<SymbolKind, { halfWidth: number; halfHeight: number }> = {
   resistor: { halfWidth: 40, halfHeight: 12 },
   battery: { halfWidth: 40, halfHeight: 16 },
   lamp: { halfWidth: 40, halfHeight: 14 },
   switch: { halfWidth: 40, halfHeight: 15 },
   led: { halfWidth: 40, halfHeight: 22 },
+  capacitor: { halfWidth: 40, halfHeight: 15 },
+  diode: { halfWidth: 40, halfHeight: 12 },
+  ground: { halfWidth: 15, halfHeight: 12 },
 };
 
 export const PALETTE:{ kind: SymbolKind; label: string }[] = [
@@ -45,4 +62,7 @@ export const PALETTE:{ kind: SymbolKind; label: string }[] = [
   { kind: 'lamp', label: 'Žárovka' },
   { kind: 'switch', label: 'Spínač' },
   { kind: 'led', label: 'LED' },
+  { kind: 'capacitor', label: 'Kondenzátor' },
+  { kind: 'diode', label: 'Dioda' },
+  { kind: 'ground', label: 'Zem' },
 ];

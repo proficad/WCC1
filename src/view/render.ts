@@ -8,8 +8,7 @@ import { GRID, SYMBOL_SVG } from './symbols';
 const px = (gu: number) => gu * GRID;
 
 export function symbolMarkup(kind: SymbolKind, x: number, y: number, rotation: Rotation, cls = ''): string {
-  const body = SYMBOL_SVG[kind] ?? '';
-  return `<g class="symbol ${cls}" transform="translate(${px(x)} ${px(y)}) rotate(${rotation})">${body}</g>`;
+  return `<g class="symbol ${cls}" transform="translate(${px(x)} ${px(y)}) rotate(${rotation})">${SYMBOL_SVG[kind]}</g>`;
 }
 
 function polyline(points: Point[], cls: string): string {
