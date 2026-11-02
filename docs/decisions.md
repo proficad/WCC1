@@ -17,6 +17,13 @@
 - **Definice pinů všech 8 značek patří do fáze 1**, i značek s prioritou COULD. **Důvod:** T3 vyžaduje testovat pozice pinů podle referenční tabulky včetně země a stojí to jen pár řádků.
 
 - **Typ značky se jmenuje `PlacedSymbol`**, ne `Symbol` jako v PRD §5. **Důvod:** `Symbol` by v TypeScriptu zastínil vestavěný globální `Symbol`.
+- **Chování automatu, které PRD neurčuje** (fáze 3):
+  - Začátek kreslení vodiče zruší výběr.
+  - Během kreslení vodiče se R a Delete ignorují a pravé tlačítko kreslení zruší, stejně jako u pokládání (F10).
+  - Esc v režimu výběru zruší výběr.
+  - Volba jiné značky v paletě během pokládání zachová aktuální rotaci.
+
+  **Důvod:** jednoznačné a nejjednodušší varianty. Žádná z nich není vidět v akceptačních kritériích.
 
 ## Zamítnuté námitky
 
