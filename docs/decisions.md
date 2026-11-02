@@ -16,6 +16,8 @@
 - **Vodič se kreslí klik–klik (F16)** a nápověda ve stavovém řádku (F23) je opravená. **Důvod:** F23 uváděla „táhni vodič“, což odporovalo F16. Klik–klik je jednodušší a tažení myší pak znamená jen posun značky.
 - **Definice pinů všech 8 značek patří do fáze 1**, i značek s prioritou COULD. **Důvod:** T3 vyžaduje testovat pozice pinů podle referenční tabulky včetně země a stojí to jen pár řádků.
 
+- **Typ značky se jmenuje `PlacedSymbol`**, ne `Symbol` jako v PRD §5. **Důvod:** `Symbol` by v TypeScriptu zastínil vestavěný globální `Symbol`.
+
 ## Zamítnuté námitky
 
 *(zatím žádné)*
