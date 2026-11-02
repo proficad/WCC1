@@ -3,3 +3,5 @@ export * from './types';
 export * from './symbols';
 export * from './geometry';
 export * from './routing';
+export * from './commands';
+export * from './serialization';
