@@ -1,5 +1,5 @@
-// Entry point. Wiring of model/, editor/, view/ and controller/ comes in later phases (docs/plan.md).
+import './style.css';
+import { mountEditor } from './controller';
+
 const app = document.querySelector<HTMLDivElement>('#app');
-if (app) {
-  app.textContent = 'Mini editor schémat';
-}
+if (app) mountEditor(app);

@@ -1,0 +1,63 @@
+:root {
+  --paper: #fbfcfb;
+  --panel: #eef2f1;
+  --ink: #1b2422;
+  --muted: #5f6b68;
+  --grid: #c3cdca;
+  --accent: #1f5fbf;
+  --accent-soft: #dfe9f8;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--ink);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+
+#app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 132px 1fr;
+}
+
+.palette {
+  background: var(--panel);
+  border-right: 1px solid var(--grid);
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.palette-item {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.palette-item svg { width: 88px; height: 40px; }
+.palette-item:hover { background: var(--paper); }
+.palette-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.palette-item.active { background: var(--accent-soft); border-color: var(--accent); }
+
+.stage { position: relative; overflow: hidden; background: var(--paper); }
+.canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+.grid-dot { fill: var(--grid); }
+
+.symbol, .wire {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.symbol .thick { stroke-width: 5; stroke-linecap: butt; }
+.symbol .arrow { stroke-width: 1.5; }
+.symbol .label { fill: var(--ink); stroke: none; font-size: 12px; font-weight: 600; }
+.symbol.preview { opacity: 0.4; }
