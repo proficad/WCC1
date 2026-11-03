@@ -2,7 +2,7 @@
 
 Jednostránková webová aplikace pro kreslení jednoduchých elektrických schémat. Značky podle IEC/ČSN se pokládají na mřížku, otáčejí se a posouvají a jejich piny se spojují vodiči, které editor vede pravoúhle. Schéma se průběžně ukládá v prohlížeči.
 
-Je to ukázkový projekt ke školení vývoje s AI. Prošel celým cyklem: PRD → oponentura → implementační plán → implementace po fázích s testy. Každá fáze je jeden commit.
+Vznikl jako vlastní projekt na školení vývoje s AI. Prošel celým cyklem: PRD → oponentura → implementační plán → implementace po fázích s testy. Každá fáze je jeden commit.
 
 ## Spuštění
 

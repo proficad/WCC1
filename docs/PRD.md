@@ -1,19 +1,19 @@
 # PRD: Mini editor schémat v prohlížeči
 
-**Stav:** návrh v2 (po oponentuře) · **Datum:** 2026-11-02 · **Účel:** ukázkový projekt na školení (vývoj s AI: PRD → implementace)
+**Stav:** v2 (po oponentuře), implementováno · **Datum:** 2026-11-02 · **Účel:** vlastní projekt účastníka školení vývoje s AI (PRD → implementace)
 
 ## 1. Shrnutí
 
 Jednostránková webová aplikace, ve které uživatel kreslí jednoduchá elektrická schémata. Pokládá značky podle IEC/ČSN na mřížku, otáčí je a posouvá a spojuje jejich piny vodiči. Editor vede vodiče sám, pravoúhle. Schéma se průběžně ukládá do prohlížeče.
 
-Rozsah je záměrně malý, aby se na něm dal na školení projít celý cyklus od zadání po hotový a otestovaný kód. **Odhad implementace s AI je 2–3 h. Odhad není ověřený.** Proto mají požadavky priority (sekce 4.0). Jako první se dokončí všechny MUST včetně jejich testů a teprve potom se pokračuje dál.
+Rozsah je záměrně malý, aby se na něm dal v čase školení projít celý cyklus od zadání po hotový a otestovaný kód. **Odhad implementace s AI byl 2–3 h a nikdo ho neověřil.** Proto mají požadavky priority (sekce 4.0). Jako první se dokončí všechny MUST včetně jejich testů a teprve potom se pokračuje dál.
 
 ## 2. Cíle a necíle
 
 ### Cíle
 - Nováček nakreslí smyčku baterie, spínač, rezistor, LED **do 2 minut bez vysvětlení**. Pomáhá mu nápověda ve stavovém řádku (F23). Ověřuje se chodbovým testem (AK 9).
 - Kód má čistě oddělený datový model a logiku interakce od vykreslování, aby se obojí dalo testovat bez prohlížeče.
-- Projekt je malý a srozumitelný, takže se dá projít celý během školení.
+- Projekt je malý a srozumitelný, takže se dá projít celý v čase školení.
 
 ### Necíle (v1 je výslovně neřeší)
 - Undo/redo
@@ -29,7 +29,7 @@ Rozsah je záměrně malý, aby se na něm dal na školení projít celý cyklus
 
 ## 3. Uživatelé
 
-Primárně účastníci školení. Uživatel aplikace je kdokoli, kdo zná základní elektrotechnické značky. Aplikace se ovládá myší a klávesnicí na desktopu.
+Uživatel aplikace je kdokoli, kdo zná základní elektrotechnické značky. Aplikace se ovládá myší a klávesnicí na desktopu.
 
 ## 4. Funkční požadavky
 
@@ -110,7 +110,7 @@ Bez tažení se značka přesune tak, že se smaže a položí znovu.
 ```ts
 type Rotation = 0 | 90 | 180 | 270;
 
-interface Symbol {
+interface PlacedSymbol {   // not "Symbol": it would shadow the global Symbol
   id: string;           // unique, e.g. crypto.randomUUID()
   kind: SymbolKind;     // 'resistor' | 'battery' | ... | 'ground'
   x: number;            // center, grid units
@@ -122,7 +122,7 @@ interface PinRef { symbolId: string; pin: number; }
 
 interface Wire { id: string; a: PinRef; b: PinRef; }
 
-interface Schematic { version: 1; symbols: Symbol[]; wires: Wire[]; }
+interface Schematic { version: 1; symbols: PlacedSymbol[]; wires: Wire[]; }
 ```
 
 Pozice pinu v absolutních souřadnicích = střed značky + lokální offset pinu otočený o `rotation`. Souřadnice jsou obrazovkové (osa y roste dolů), otočení o 90° po směru hodinových ručiček je (x, y) → (−y, x).

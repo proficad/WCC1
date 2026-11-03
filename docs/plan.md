@@ -1,5 +1,7 @@
 # Implementační plán: Mini editor schémat
 
+**Stav:** všechny fáze hotové (2026-11-02), každá je jeden commit: fáze 0 `c7e5859`, 1 `128f252`, 2 `91431d5`, 3 `96f68d7`, 4 `90b21e0`, 5 `593691a`, 6 `0ab9d3b`, 7 `49d9a83`.
+
 Zdroj: `docs/PRD.md` (v2). Pořadí fází odpovídá prioritám v PRD §4.0: nejdřív všechny MUST, pak SHOULD, nakonec COULD. Testy jsou jen ve fázích 1–3 a 6, protože T3 je požaduje jen pro vrstvy `model/` a `editor/`.
 
 Vodič se kreslí klik–klik podle F16: klik na pin, pak klik na cílový pin. Tažení myší znamená jen posun značky.
@@ -48,7 +50,7 @@ Vodič se kreslí klik–klik podle F16: klik na pin, pak klik na cílový pin. 
 - Autosave a obnova po načtení (F20, F21).
 - Stavový řádek (F23).
 
-**Hotovo, když:** ručně projdou AK 1, 2, 4, 5, 6 a 8 a AK 7 (`npm test`) je zelené. Tady je hotové celé MUST a dá se to předvést. Zapiš čas od začátku, je to zkušební průchod z `docs/todo.md`.
+**Hotovo, když:** ručně projdou AK 1, 2, 4, 5, 6 a 8 a AK 7 (`npm test`) je zelené. Tady je hotové celé MUST a dá se to předvést.
 
 ## Fáze 6: Tažení (SHOULD)
 - Stav tažení v automatu, práh 4 px (H4), průběžný přepočet vodičů (F12).
